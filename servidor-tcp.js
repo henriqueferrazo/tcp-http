@@ -13,6 +13,10 @@ const splitando = (splitLine) => {
     return objeto;
 };
 
+const headerPost = {
+
+}
+
 const server = net.createServer((socket) => {
     console.log(
         `(${socket.remoteAddress} : ${socket.remotePort}) conectou `
@@ -26,15 +30,18 @@ const server = net.createServer((socket) => {
         console.log(splitando(dado));
 
         if (!fs.existsSync(arquivos + dado.split(" ")[1])) {
-            // socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
-            socket.write( `POST / HTTP/1.1 200 ok\r\nHost: localhost:${port}\r\n`);
+            socket.write( 
+                `POST / HTTP/1.1
+                 Host: localhost:${port}
+                 Accept: text/plain `
+            );
             socket.end();
         } else {
             console.log(dado.split(" ")[1]);
             fs.readFile(arquivos + objeto.path, (err, data) => {
                 if(objeto.path == "/"){ 
                     let filesLink="<ul>";
-                    socket.write('HTTP/ 200 OK\r\n\r\n');
+                    socket.write('HTTP/1.1 200 OK\r\n\r\n');
                     let filesList = fs.readdirSync("./public");
                     filesList.forEach(el => {
                         if(fs.statSync("./public/"+ el).isFile()){
