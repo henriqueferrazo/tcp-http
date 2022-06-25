@@ -3,6 +3,8 @@ const fs = require("fs");
 
 const arquivos = "./public/";
 
+
+
 const splitando = (splitLine) => {
     var split = splitLine.toString().split(" ");
     let objeto = {
@@ -23,23 +25,20 @@ const server = net.createServer((socket) => {
     );
 
     socket.on("data", (data) => {
-        var dado = data.toString();
-        var objeto = splitando(dado);
+        let dado = data.toString();
+        let objeto = splitando(dado);
 
-        console.log(dado);
+        // console.log(dado);
         console.log(splitando(dado));
 
         if (!fs.existsSync(arquivos + dado.split(" ")[1])) {
-            socket.write( 
-                `POST / HTTP/1.1
-                 Host: localhost:${port}
-                 Accept: text/plain `
-            );
+            socket.write('HTTP/1.1 404 NOT FILE\r\n\r\n')
             socket.end();
         } else {
-            console.log(dado.split(" ")[1]);
+            // console.log(dado.split(" ")[1]);
             fs.readFile(arquivos + objeto.path, (err, data) => {
                 if(objeto.path == "/"){ 
+                    
                     let filesLink="<ul>";
                     socket.write('HTTP/1.1 200 OK\r\n\r\n');
                     let filesList = fs.readdirSync("./public");
@@ -50,11 +49,17 @@ const server = net.createServer((socket) => {
                             </a></li>` ;       
                         }
                     });
-                     
+                    
                     filesLink+="</ul>";
-                  
-                    socket.write("<h1>Lista de arquivos:</h1> " + filesLink);
-                    socket.end()
+                    let form = `<form method='post'><br/>
+                    <input id='nameArquivo' name='arquivo' type='text'>
+                    <input name='submit' type='submit'>
+                    </form>`;
+
+                    console.log(dado[dado.length - 1]);
+
+                    socket.write("<h1>Lista de arquivos:</h1> " + filesLink + form);
+                    socket.end();
                 } else if (err) {
                     socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
                     console.log(err);
@@ -69,7 +74,7 @@ const server = net.createServer((socket) => {
 
     socket.on("end", () => {
         console.log(
-            `=> (${socket.remoteAddress} : ${socket.remotePort}) desconectou`
+            `(${socket.remoteAddress} : ${socket.remotePort}) desconectou`
         );
     });
 });
