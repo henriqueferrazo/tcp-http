@@ -18,7 +18,7 @@ const splitCorpo = (splitLien) => {
     let ultimoIndex = splitandoCorpoRequest[splitandoCorpoRequest.length - 1];
     let ultimaPalavraArray = ultimoIndex.split('=');
     let ultimaPalavra = ultimaPalavraArray[ultimaPalavraArray.length - 1];
-    return './' + ultimaPalavra;
+    return ultimaPalavra;
 
 }
 
@@ -31,6 +31,7 @@ const server = net.createServer((socket) => {
         let dado = data.toString();
         let objeto = splitando(dado);
         console.log(dado);
+        let body = splitCorpo(dado);
 
         console.log(splitando(dado));
         if (!fs.existsSync(arquivos + dado.split(" ")[1])) {
@@ -59,14 +60,14 @@ const server = net.createServer((socket) => {
                     </form>`;
                     console.log(splitCorpo(dado));
                     socket.write("<h1>Lista de arquivos:</h1> " + filesLink + form);
-                    if (objeto.method == 'post') {
-                      const appendDaraFile = async (path, data) => {
-                        const oldBuffer = await fs.promises.readFile(path);
-                        const oldContent = oldBuffer.toString();
-                        await fs.promises.appendFile(path, data);
-                        const newBuffer = await fs.promises.readFile(path);
-                        const newContent = newBuffer.toString();
-                      }
+                    if (objeto.method == 'POST') {
+                        const appendDataFile = async (path, data) => {
+                            await fs.promises.appendFile(path, data);
+                            const buff = await fs.promises.readFile(path);
+                            const content = buff.toString()
+                            console.log(`Content : ${content}`)
+                        }
+                        appendDataFile(arquivos + body, 'Hello Word!!')
                     }
                     socket.end();
 
