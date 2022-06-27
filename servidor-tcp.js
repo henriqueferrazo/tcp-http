@@ -3,19 +3,22 @@ const fs = require("fs");
 
 const arquivos = "./public/";
 
-
-
 const splitando = (splitLine) => {
-    var split = splitLine.toString().split(" ");
+    let splita = splitLine.toString().split(" ");
     let objeto = {
-        method: split[0],
-        path: split[1],
+        method: splita[0],
+        path: splita[1],
     };
 
     return objeto;
 };
 
-const headerPost = {
+const splitCorpo = (splitLien) => {
+    let splitandoCorpoRequest = splitLien.toString().split('\r\n');
+    let ultimoIndex = splitandoCorpoRequest[splitandoCorpoRequest.length - 1];
+    let ultimaPalavraArray = ultimoIndex.split('=');
+    let ultimaPalavra = ultimaPalavraArray[ultimaPalavraArray.length - 1];
+    return './' + ultimaPalavra;
 
 }
 
@@ -27,39 +30,46 @@ const server = net.createServer((socket) => {
     socket.on("data", (data) => {
         let dado = data.toString();
         let objeto = splitando(dado);
+        console.log(dado);
 
-        // console.log(dado);
         console.log(splitando(dado));
-
         if (!fs.existsSync(arquivos + dado.split(" ")[1])) {
             socket.write('HTTP/1.1 404 NOT FILE\r\n\r\n')
             socket.end();
         } else {
-            // console.log(dado.split(" ")[1]);
+
             fs.readFile(arquivos + objeto.path, (err, data) => {
-                if(objeto.path == "/"){ 
-                    
-                    let filesLink="<ul>";
+                if (objeto.path == "/") {
+
+                    let filesLink = "<ul>";
                     socket.write('HTTP/1.1 200 OK\r\n\r\n');
                     let filesList = fs.readdirSync("./public");
                     filesList.forEach(el => {
-                        if(fs.statSync("./public/"+ el).isFile()){
-                            filesLink+=`<br/><li><a href='${el}'>
+                        if (fs.statSync("./public/" + el).isFile()) {
+                            filesLink += `<br/><li><a href='${el}'>
                                 ${el}
-                            </a></li>` ;       
+                            </a></li>` ;
                         }
                     });
-                    
-                    filesLink+="</ul>";
+
+                    filesLink += "</ul>";
                     let form = `<form method='post'><br/>
-                    <input id='nameArquivo' name='arquivo' type='text'>
-                    <input name='submit' type='submit'>
+                    <input id='nameArquivo' name='arquvivo'  type='text'>
+                    <input type='submit'>
                     </form>`;
-
-                    console.log(dado[dado.length - 1]);
-
+                    console.log(splitCorpo(dado));
                     socket.write("<h1>Lista de arquivos:</h1> " + filesLink + form);
+                    if (objeto.method == 'post') {
+                      const appendDaraFile = async (path, data) => {
+                        const oldBuffer = await fs.promises.readFile(path);
+                        const oldContent = oldBuffer.toString();
+                        await fs.promises.appendFile(path, data);
+                        const newBuffer = await fs.promises.readFile(path);
+                        const newContent = newBuffer.toString();
+                      }
+                    }
                     socket.end();
+
                 } else if (err) {
                     socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
                     console.log(err);

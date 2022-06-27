@@ -5,15 +5,14 @@
 </head>
 <body>
     <center>
-        <form action="">
+        <form action="/" method="post" enctype="multipart/form-data">
             <input type="text" id="name"/>
             <input type="submit" id="submit"/>
         </form>
     </center>
-    <script>
-        let input = document.querySelector('#nameArquivo');
-        let texto = input.value;
-        console.log(texto)
-    </script>
+   <?php 
+        $say = htmlspecialchars($_POST['say']);
+        $to  = htmlspecialchars($_POST['to']);
+   ?>
 </body>
 </html>
